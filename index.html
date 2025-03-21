@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игра в кальмара: Вырезание печенки</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: white;
+            text-align: center;
+        }
+
+        .game-container {
+            margin: 20px;
+        }
+
+        button {
+            background-color: #444;
+            border: none;
+            color: white;
+            padding: 10px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #666;
+        }
+
+        canvas {
+            border: 2px solid white;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .blocked-message {
+            margin-top: 20px;
+            color: red;
+            font-size: 20px;
+        }
+
+        .input-container {
+            margin-top: 20px;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Игра в кальмара: Вырезание печенки</h1>
+
+        <div id="game">
+            <h2>Аккуратно вырежьте печеньку!</h2>
+            <canvas id="cookieGame"></canvas>
+            <button onclick="startGame()">Начать игру</button>
+        </div>
+
+        <div id="blocked" class="blocked-message" style="display: none;">
+            <p>Вы проиграли! Доступ к сайту заблокирован.</p>
+            <p>Введите код для восстановления доступа:</p>
+            <div class="input-container">
+                <input type="text" id="codeInput" placeholder="Введите код" />
+                <button onclick="checkCode()">Отправить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Проверка, был ли игрок заблокирован
+        if (localStorage.getItem('blocked') === 'true') {
+            document.getElementById('game').style.display = 'none';
+            document.getElementById('blocked').style.display = 'block';
+        }
+
+        // Элементы игры
+        let cookieGameCanvas = document.getElementById('cookieGame');
+        let ctx = cookieGameCanvas.getContext('2d');
+
+        function startGame() {
+            if (localStorage.getItem('blocked') === 'true') return;
+
+            cookieGameCanvas.width = 400;
+            cookieGameCanvas.height = 400;
+
+            let cookieShape = new Path2D();
+            cookieShape.arc(200, 200, 150, 0, Math.PI * 2); // Круг для печеньки
+
+            // Нарисовать печеньку
+            ctx.clearRect(0, 0, cookieGameCanvas.width, cookieGameCanvas.height);
+            ctx.beginPath();
+            ctx.arc(200, 200, 150, 0, Math.PI * 2);
+            ctx.fillStyle = '#84C84B'; // Цвет печеньки, как в игре
+            ctx.fill();
+            ctx.stroke();
+            ctx.closePath();
+
+            // Логика вырезания
+            cookieGameCanvas.addEventListener('mousedown', function(event) {
+                let mouseX = event.offsetX;
+                let mouseY = event.offsetY;
+
+                // Проверка, не выйдет ли клик за пределы печеньки
+                if (Math.sqrt(Math.pow(mouseX - 200, 2) + Math.pow(mouseY - 200, 2)) > 150) {
+                    alert('Вы проиграли, печенька сломана!');
+                    localStorage.setItem('blocked', 'true'); // Заблокировать доступ
+                    document.location.reload(); // Перезагрузить страницу
+                }
+            });
+        }
+
+        // Ввод кода для восстановления доступа
+        function checkCode() {
+            const code = document.getElementById('codeInput').value;
+            if (code === '2914') {
+                localStorage.removeItem('blocked');
+                document.getElementById('game').style.display = 'block';
+                document.getElementById('blocked').style.display = 'none';
+                alert('Вы успешно вернулись в игру!');
+            } else {
+                alert('Неверный код!');
+            }
+        }
+    </script>
+</body>
+</html>
